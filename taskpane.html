@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Broncellen</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="taskpane.css?v=2">
+</head>
+<body>
+  <header class="top">
+    <div class="bar">
+      <button id="back" class="icon-btn" type="button" title="Terug naar de vorige cel" disabled>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 3 2 8l5 5M2.5 8H14"/></svg>
+      </button>
+      <div id="cell" class="cell" aria-live="polite">—</div>
+      <button id="refresh" class="icon-btn" type="button" title="Vernieuwen">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M12.5 1.5v3h-3"/></svg>
+      </button>
+      <button id="pause" class="icon-btn toggle" type="button" aria-pressed="false" aria-label="Pauze" title="Pauzeren: de selectie tijdelijk niet volgen">
+        <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5v9M10.5 3.5v9"/></svg>
+        <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path class="solid" d="M5 3.2v9.6L12.5 8z"/></svg>
+      </button>
+    </div>
+    <div class="formula">
+      <span class="fx">fx</span>
+      <div id="formula" class="formula-text"></div>
+    </div>
+    <div class="busy-bar" aria-hidden="true"></div>
+  </header>
+  <div class="settings">
+    <label title="Aantal rijen boven en onder de broncel">Rijen ±<input id="ctx-rows" type="number" min="0" max="10" step="1" value="2"></label>
+    <label title="Aantal kolommen links en rechts van de broncel">Kolommen ±<input id="ctx-cols" type="number" min="0" max="10" step="1" value="2"></label>
+    <select id="mode" title="Opmaak: Excel tekent de echte opmaak. Snel: eenvoudig rooster.">
+      <option value="image">Opmaak</option>
+      <option value="grid">Snel</option>
+    </select>
+  </div>
+  <div class="paused-banner">
+    <span>Gepauzeerd: de selectie wordt niet gevolgd.</span>
+    <button id="resume" type="button">Hervatten</button>
+  </div>
+  <div id="status" class="status" role="status" hidden></div>
+  <main id="cards" class="cards"></main>
+  <script src="formula.js?v=2"></script>
+  <script src="taskpane.js?v=2"></script>
+</body>
+</html>

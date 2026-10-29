@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <title>Broncellen – ontwikkelvoorbeeld</title>
+  <link rel="stylesheet" href="../taskpane.css">
+  <style>
+    html { background: #d6d6d6; }
+    body { width: 340px; min-height: 100vh; box-shadow: 0 0 0 1px #b5b5b5; }
+    .dev-switch { position: fixed; left: 360px; top: 12px; font: 13px "Segoe UI", sans-serif; }
+  </style>
+</head>
+<body>
+  <!-- Het taakvenster wordt hieronder ingeladen uit ../taskpane.html, zonder Office.js. -->
+  <button class="dev-switch" type="button" onclick="const d = document.documentElement; d.dataset.theme = d.dataset.theme === 'dark' ? 'light' : 'dark'">Licht / donker</button>
+  <script>
+    // Maakt een nep-uitsnede zoals Excel ze met getImage() zou leveren.
+    function fakeImage(view, fills = {}, bold = {}) {
+      const px = 4 / 3;
+      const W = view.cols.reduce((a, c) => a + c.size, 0) * px;
+      const H = view.rows.reduce((a, r) => a + r.size, 0) * px;
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(W);
+      canvas.height = Math.round(H);
+      const g = canvas.getContext("2d");
+      g.fillStyle = "#fff";
+      g.fillRect(0, 0, W, H);
+      let y = 0;
+      view.rows.forEach((r, i) => {
+        let x = 0;
+        view.cols.forEach((c, j) => {
+          const w = c.size * px, h = r.size * px, key = `${i},${j}`;
+          if (fills[key]) { g.fillStyle = fills[key]; g.fillRect(x, y, w, h); }
+          g.strokeStyle = "#d4d4d4";
+          g.strokeRect(x + 0.5, y + 0.5, w, h);
+          g.fillStyle = "#000";
+          g.font = `${bold[key] ? "bold " : ""}14.5px Calibri, sans-serif`;
+          const t = view.text[i][j];
+          const num = view.types[i][j] === "Double";
+          g.textAlign = num ? "right" : "left";
+          g.fillText(t, num ? x + w - 3 : x + 3, y + h - 5, w - 4);
+          x += w;
+        });
+        y += r.size * px;
+      });
+      return canvas.toDataURL("image/png").split(",")[1];
+    }
+
+    function view(r0, c0, text, types, widths) {
+      return {
+        win: { r1: r0, c1: c0, r2: r0 + text.length - 1, c2: c0 + text[0].length - 1 },
+        cut: { rows: false, cols: false },
+        cols: text[0].map((_, j) => ({ index: c0 + j, size: widths ? widths[j] : 48 })),
+        rows: text.map((_, i) => ({ index: r0 + i, size: 15 })),
+        text, types, image: null, props: null,
+      };
+    }
+
+    const formula = "=SOM(B10;D40)*(1+Btw)+Kosten!B4+[Map2.xlsx]Blad1!A1";
+    const span = (s, from = 0) => { const i = formula.indexOf(s, from); return [i, i + s.length]; };
+
+    const v1 = view(7, 0, [
+      ["Omzet", "", "", "", ""],
+      ["Jan", "1250", "", "", ""],
+      ["Feb", "1512,5", "", "", ""],
+      ["Mrt", "1388", "", "", ""],
+      ["Totaal", "4150,5", "", "", ""],
+    ], [
+      ["String", "Empty", "Empty", "Empty", "Empty"],
+      ["String", "Double", "Empty", "Empty", "Empty"],
+      ["String", "Double", "Empty", "Empty", "Empty"],
+      ["String", "Double", "Empty", "Empty", "Empty"],
+      ["String", "Double", "Empty", "Empty", "Empty"],
+    ], [64, 56, 48, 48, 48]);
+    v1.image = fakeImage(v1, { "0,0": "#dde8cb", "0,1": "#dde8cb", "4,0": "#f2f2f2", "4,1": "#f2f2f2" }, { "0,0": 1, "4,0": 1, "4,1": 1 });
+
+    const v2 = view(37, 1, [
+      ["", "Kost", "Bedrag", "", ""],
+      ["", "Huur", "800", "", ""],
+      ["", "Energie", "245,3", "", ""],
+      ["", "Verzekering", "61", "", ""],
+      ["", "", "", "", ""],
+    ], [
+      ["Empty", "String", "String", "Empty", "Empty"],
+      ["Empty", "String", "Double", "Empty", "Empty"],
+      ["Empty", "String", "Double", "Empty", "Empty"],
+      ["Empty", "String", "Double", "Empty", "Empty"],
+      ["Empty", "Empty", "Empty", "Empty", "Empty"],
+    ], [48, 80, 56, 48, 48]);
+    v2.props = v2.text.map((row, i) => row.map((_, j) => ({
+      format: {
+        fill: { color: i === 0 && (j === 1 || j === 2) ? "#FCE4D6" : "#FFFFFF" },
+        font: { bold: i === 0, italic: false, color: "#000000" },
+        horizontalAlignment: "General",
+      },
+    })));
+
+    const v3 = view(0, 0, [
+      ["Parameter", "Waarde", "", ""],
+      ["Btw", "21%", "", ""],
+      ["Korting", "5%", "", ""],
+      ["", "", "", ""],
+    ], [
+      ["String", "String", "Empty", "Empty"],
+      ["String", "Double", "Empty", "Empty"],
+      ["String", "Double", "Empty", "Empty"],
+      ["Empty", "Empty", "Empty", "Empty"],
+    ], [72, 56, 48, 48]);
+    v3.image = fakeImage(v3, {}, { "0,0": 1, "0,1": 1 });
+
+    const v4 = view(1, 0, [
+      ["", "", "", ""], ["", "Vast", "12", ""], ["", "Variabel", "30", ""], ["", "", "", ""], ["", "", "", ""],
+    ], [
+      ["Empty", "Empty", "Empty", "Empty"], ["Empty", "String", "Double", "Empty"], ["Empty", "String", "Double", "Empty"],
+      ["Empty", "Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty", "Empty"],
+    ]);
+    v4.image = fakeImage(v4);
+
+    const model = {
+      sheet: "Resultaten",
+      address: "C245",
+      formula,
+      text: "",
+      notes: [],
+      sources: [
+        { key: "resultaten!B10", sheet: "Resultaten", area: { r1: 9, c1: 1, r2: 9, c2: 1 }, color: "#2f6fd6",
+          spans: [span("B10")], view: v1, first: { formula: "=B9*1,1", text: "1.512,50" } },
+        { key: "resultaten!D40", sheet: "Resultaten", area: { r1: 38, c1: 3, r2: 40, c2: 3 }, color: "#d23a2c",
+          spans: [span("D40")], view: v2, first: { formula: "800", text: "800" } },
+        { key: "naam:btw", sheet: "Parameters", area: { r1: 1, c1: 1, r2: 1, c2: 1 }, via: "naam Btw", color: "#68707a",
+          spans: [span("Btw")], view: v3, first: { formula: "0,21", text: "21%" } },
+        { key: "kosten!B4", sheet: "Kosten", area: { r1: 3, c1: 1, r2: 3, c2: 1 }, color: "#68707a",
+          spans: [span("Kosten!B4")], view: v4, first: { formula: "Variabel", text: "Variabel" } },
+        { key: "x:[Map2.xlsx]Blad1!A1", label: "[Map2.xlsx]Blad1!A1", color: "#68707a",
+          spans: [span("[Map2.xlsx]Blad1!A1")],
+          problem: "Verwijst naar een andere werkmap; die kan niet getoond worden." },
+      ],
+    };
+
+    const load = (src) => new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = reject;
+      document.body.append(s);
+    });
+
+    (async () => {
+      const html = await (await fetch("../taskpane.html")).text();
+      const pane = new DOMParser().parseFromString(html, "text/html");
+      for (const el of pane.body.children) if (el.tagName !== "SCRIPT") document.body.append(document.importNode(el, true));
+      await load("../formula.js");
+      await load("../taskpane.js");
+      window.BronPanel.render(model);
+    })();
+  </script>
+</body>
+</html>

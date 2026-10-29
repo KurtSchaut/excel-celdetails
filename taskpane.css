@@ -1,0 +1,456 @@
+:root {
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --text: #242424;
+  --muted: #666666;
+  --line: #e3e3e3;
+  --line-strong: #cdcdcd;
+  --hover: rgba(0, 0, 0, 0.05);
+  --accent: #107c41;
+  --head-bg: #f3f3f3;
+  --head-text: #616161;
+  --head-on-text: #1f1f1f;
+  --code-bg: #f3f3f3;
+  --note-bg: #fff4ce;
+  --note-text: #4d3a00;
+  --error-bg: #fde7e9;
+  --error-text: #8a1c24;
+  --mono: "Cascadia Mono", Consolas, "Courier New", monospace;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #1f1f1f;
+  --surface: #2b2b2b;
+  --text: #ececec;
+  --muted: #a8a8a8;
+  --line: #3b3b3b;
+  --line-strong: #4d4d4d;
+  --hover: rgba(255, 255, 255, 0.08);
+  --accent: #3fae6b;
+  --head-bg: #333333;
+  --head-text: #b4b4b4;
+  --head-on-text: #ffffff;
+  --code-bg: #333333;
+  --note-bg: #3d3420;
+  --note-text: #f3d98c;
+  --error-bg: #3f2326;
+  --error-text: #f4b4ba;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  font: 13px/1.4 "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button, input, select { font: inherit; color: inherit; }
+
+svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+svg .solid { fill: currentColor; stroke: none; }
+
+.muted { color: var(--muted); }
+
+/* ---------- Kop ---------- */
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 8px 12px 10px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.bar { display: flex; align-items: center; gap: 4px; }
+
+.cell {
+  flex: 1;
+  min-width: 0;
+  padding: 0 4px;
+  font: 600 15px/1.3 var(--mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.icon-btn:hover:not(:disabled) { background: var(--hover); }
+.icon-btn:disabled { color: var(--line-strong); cursor: default; }
+
+.toggle .i-play { display: none; }
+.toggle[aria-pressed="true"],
+.toggle[aria-pressed="true"]:hover:not(:disabled) { background: var(--accent); color: #fff; }
+.toggle[aria-pressed="true"] .i-play { display: block; }
+.toggle[aria-pressed="true"] .i-pause { display: none; }
+
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.formula {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--code-bg);
+}
+
+.fx {
+  flex: none;
+  font: italic 600 12px/1.6 Cambria, Georgia, serif;
+  color: var(--muted);
+}
+
+.formula-text {
+  min-width: 0;
+  max-height: 4.8em;
+  overflow: auto;
+  font: 12.5px/1.6 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.formula-text:empty::before { content: "—"; color: var(--muted); }
+.formula-text.is-value { font-family: inherit; }
+
+.ref {
+  color: var(--c);
+  font-weight: 600;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.12s;
+}
+
+.ref.hot {
+  background: color-mix(in srgb, var(--c) 18%, transparent);
+  box-shadow: 0 1.5px 0 var(--c);
+}
+
+/* Namen en verwijzingen naar andere bladen kleurt Excel niet. */
+.ref.plain {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: underline dotted var(--muted);
+  text-underline-offset: 3px;
+}
+
+.settings {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 12px 0;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.settings label { display: inline-flex; align-items: center; gap: 4px; }
+
+.settings input {
+  width: 3em;
+  height: 24px;
+  padding: 0 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.settings select {
+  height: 24px;
+  margin-left: auto;
+  padding: 0 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.busy-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.busy-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  background: var(--accent);
+}
+
+/* Onbepaalde laadbalk: beweegt enkel zolang er gegevens geladen worden. */
+body.busy .busy-bar { opacity: 1; }
+body.busy .busy-bar::after { animation: busy 1s ease-in-out infinite; }
+
+@keyframes busy {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
+}
+
+/* ---------- Meldingen ---------- */
+
+.paused-banner {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 12px 0;
+  padding: 6px 6px 6px 10px;
+  border-radius: 4px;
+  background: var(--note-bg);
+  color: var(--note-text);
+  font-size: 12px;
+}
+
+.paused-banner span { flex: 1; }
+
+.paused-banner button {
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+}
+
+body.paused .paused-banner { display: flex; }
+body.paused .cards { opacity: 0.55; }
+
+.status {
+  margin: 10px 12px 0;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: var(--note-bg);
+  color: var(--note-text);
+  font-size: 12px;
+}
+
+.status.error { background: var(--error-bg); color: var(--error-text); }
+
+.empty {
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---------- Kaarten ---------- */
+
+.cards {
+  display: grid;
+  gap: 10px;
+  padding: 10px 12px 16px;
+  transition: opacity 0.15s;
+}
+
+.card {
+  min-width: 0;
+  padding: 8px 10px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.card.hot {
+  border-color: var(--c);
+  box-shadow: 0 0 0 1px var(--c), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  margin-bottom: 8px;
+}
+
+.card-addr {
+  min-width: 0;
+  color: var(--c);
+  font: 600 13px/1.3 var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.tag {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 3px;
+  background: var(--code-bg);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.goto {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  margin-left: auto;
+  padding: 0 8px 0 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.goto svg { width: 14px; height: 14px; }
+.goto:hover { background: var(--hover); border-color: var(--muted); }
+
+.card-problem { margin: 0; color: var(--muted); }
+
+.card-note { margin: 6px 0 0; color: var(--muted); font-size: 11.5px; }
+
+/* Uitsnede met kolom- en rijkoppen zoals in Excel. */
+.sheet {
+  display: grid;
+  grid-template-columns: var(--rh) minmax(0, 1fr);
+  border: 1px solid var(--line-strong);
+  background: var(--head-bg);
+  color: var(--head-text);
+  font: 10px/1 "Segoe UI", system-ui, sans-serif;
+}
+
+.corner { border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); }
+
+.col-heads {
+  display: flex;
+  height: 16px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.row-heads { position: relative; border-right: 1px solid var(--line-strong); }
+
+.row-heads > div {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.col-heads span, .row-heads span {
+  display: grid;
+  place-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.col-heads span + span { border-left: 1px solid var(--line); }
+.row-heads span + span { border-top: 1px solid var(--line); }
+
+.col-heads .on, .row-heads .on {
+  background: color-mix(in srgb, var(--c) 18%, var(--head-bg));
+  color: var(--head-on-text);
+  font-weight: 600;
+}
+
+.sheet-body {
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+  container-type: inline-size;
+}
+
+.sheet-body img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.mark {
+  position: absolute;
+  border: 2px solid var(--c);
+  background: color-mix(in srgb, var(--c) 8%, transparent);
+  pointer-events: none;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  color: #000000;
+  font-family: Calibri, "Segoe UI", sans-serif;
+}
+
+.gc {
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 0.25em;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 1px solid #e1e1e1;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.gc.num { justify-content: flex-end; }
+
+/* Inhoud van de broncel. */
+.card-content { margin-top: 8px; }
+
+.cc-meta { margin-bottom: 2px; color: var(--muted); font-size: 11.5px; }
+
+.cc-line { display: flex; gap: 8px; align-items: baseline; }
+
+.src-formula {
+  min-width: 0;
+  font: 12px/1.5 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cc-result {
+  margin-left: 22px;
+  color: var(--muted);
+  font: 12px/1.5 var(--mono);
+  word-break: break-all;
+}
