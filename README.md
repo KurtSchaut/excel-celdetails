@@ -28,7 +28,8 @@ paneel, en omgekeerd. Klik je op een verwijzing in die formule, dan scrolt het p
 
 1. **Publiceren.** De code van het paneel moet op een https-adres staan dat Windows vertrouwt. Het
    manifest wijst naar GitHub Pages (`https://kurtschaut.github.io/excel-celdetails/`).
-2. **Gedeelde map instellen** (eenmalig, in PowerShell als administrator):
+2. **Gedeelde map instellen** (eenmalig, in een gewone PowerShell; Windows vraagt zelf om
+   beheerdersrechten voor de share):
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File scripts\gedeelde-map.ps1
